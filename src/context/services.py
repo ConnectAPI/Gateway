@@ -27,7 +27,7 @@ class Services:
     def _load_services(self):
         services = [
             Service.from_dict(service_dict)
-            for service_dict in self.db.get_all_services(exclude_fields=["_id", "created_at"])
+            for service_dict in self.db.services.find({}, {"_id": 0, "created_at": 0})
         ]
         for service in services:
             self.__services[service.prefix_path] = service
@@ -35,14 +35,8 @@ class Services:
 
     def _load_service(self, service_id) -> Service:
         db = get_db()
-        service_dict = db.get_service(service_id)
-        service_dict.pop("created_at", None)
+        service_dict = db.services.find_one({"id": service_id}, {"_id": 0, "created_at": 0})
         return Service.from_dict(service_dict)
-
-    def add_service(self, service_id):
-        service = self._load_service(service_id)
-        self.__services[service.prefix_path] = service
-        self.__services_by_id[service.id] = service
 
     def remove_service(self, service_id):
         service = self.__services_by_id.pop(service_id, None)
@@ -58,6 +52,11 @@ class Services:
 
     def get_service(self, prefix_path) -> Optional[Service]:
         return self.__services.get(prefix_path)
+
+    def reload(self):
+        self.__services.clear()
+        self.__services_by_id.clear()
+        self._load_services()
 
     def __iter__(self):
         return iter(self.__services.values())
