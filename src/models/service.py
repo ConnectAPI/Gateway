@@ -16,7 +16,10 @@ class Service:
         self.client = httpx.AsyncClient()
 
     def get_required_scopes(self, path: str, operation: str) -> list:
-        return list(self.openapi_dict["paths"][path][operation]["security"][0].values())
+        operation = self.openapi_dict["paths"][path][operation]
+        if operation.get("security", None) is None:
+            return []
+        return list(operation["security"][0].values())
 
     def _build_openapi_spec(self):
         self.openapi_dict["servers"] = [{"url": f"http://127.0.0.1:116/{self.prefix_path}"}]

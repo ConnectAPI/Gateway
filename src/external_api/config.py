@@ -1,1 +1,0 @@
-EXTERNAL_PREFIX = "/v1"

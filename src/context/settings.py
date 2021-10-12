@@ -1,16 +1,16 @@
+from sys import path
 from functools import lru_cache
-from datetime import timedelta
 
 from pydantic import BaseSettings
 
 __all__ = ["get_settings"]
 
 
+SRC_PATH = path[2]
+
+
 class Settings(BaseSettings):
     secret_key: str
-    session_max_age: int
-
-    allow_session_over_http: bool
 
     qwhale_token: str
 
@@ -18,19 +18,12 @@ class Settings(BaseSettings):
     redis_port: int
 
     auth_jwt_algorithms = ["HS256"]
-    auth_jwt_lifespan = timedelta(hours=24)
 
     class Config:
-        env_file = ".env"
+        env_file = f"{SRC_PATH}/.env"
         fields = {
             'secret_key': {
                 'env': 'secret_key',
-            },
-            'session_max_age': {
-                'env': 'session_max_age',
-            },
-            'allow_session_over_http': {
-                'env': "allow_session_over_http"
             },
             'qwhale_token': {
                 'env': "qwhale_token"

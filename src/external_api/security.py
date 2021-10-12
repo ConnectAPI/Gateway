@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import jwt
 from fastapi import HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -14,29 +12,6 @@ class OAuthJWTBearer(OAuth2PasswordBearer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.secret = get_settings().secret_key
-
-    def generate_jwt(
-            self,
-            user_id,
-            tuid: str,
-            scopes: list = None,
-    ):
-        if scopes is None:
-            scopes = []
-        encoded = jwt.encode(
-            {
-                "exp": (datetime.now() + get_settings().auth_jwt_lifespan).timestamp(),
-                "nbf": datetime.now().timestamp(),
-                "iss": "qwahle",
-                "iat": datetime.now().timestamp(),
-                "sub": user_id,
-                "scopes": scopes,
-                "tuid": tuid
-            },
-            self.secret,
-            algorithm=get_settings().auth_jwt_algorithms[0]
-        )
-        return encoded
 
     async def __call__(self, request: Request, required_scopes: list = None):
         if required_scopes is None:

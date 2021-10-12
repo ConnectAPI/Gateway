@@ -1,5 +1,4 @@
-from .api import gateway_external_api
-from .config import EXTERNAL_PREFIX
+from .api import proxy_router
 
 
-__all__ = ["gateway_external_api", "EXTERNAL_PREFIX"]
+__all__ = ["proxy_router"]

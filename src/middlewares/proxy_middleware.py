@@ -10,7 +10,12 @@ class ProxyMiddleware(BaseMiddleware):
         url = urljoin(service.url, request.service_path)
         service.client.cookies.clear()  # Do not save state for security reasons
         service.client.headers.clear()
-        service_response = await service.client.request(request.method, url=url, params=request.parameters.query)
+        service_response = await service.client.request(
+            request.method,
+            url=url,
+            params=request.parameters.query,
+            cookies=request.cookies,
+        )
         response_content = service_response.content
         response = Response(
             content=response_content,

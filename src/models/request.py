@@ -20,8 +20,6 @@ class Request(OpenAPIRequest):
             query_params,
             headers,
             cookies: dict,
-            session,
-            user_id: str,
     ):
         self.base_url = base_url
         self.service_path = service_path
@@ -31,8 +29,6 @@ class Request(OpenAPIRequest):
         self.method = method.lower()
         self.mimetype = content_type
         self.client = client
-        self.session = session
-        self.user_id = user_id
 
         self.body = body
         self.cookies = cookies
@@ -41,11 +37,10 @@ class Request(OpenAPIRequest):
         self.parameters = RequestParameters(query=query_params, header=headers, cookie=cookies, path={})
 
     @classmethod
-    async def from_fastapi_request(cls, r: FastAPIRequest, user_id: str):
+    async def from_fastapi_request(cls, r: FastAPIRequest):
         segments = r.url.path.split("/")
-        segments.pop(1)  # remove '/external'
         request_path = '/'.join(segments)[1:]
-        service_path = '/'.join(r.url.path.split("/")[3:])
+        service_path = '/'.join(r.url.path.split("/")[2:])
 
         query_params = {k: v for k, v in r.query_params.items()}
         full_content_type = r.headers.get("Content-Type")
@@ -64,6 +59,4 @@ class Request(OpenAPIRequest):
             content_type=content_type,
             method=r.method.lower(),
             cookies=r.cookies,
-            session=r.session,
-            user_id=user_id
         )
