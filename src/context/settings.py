@@ -17,23 +17,17 @@ class Settings(BaseSettings):
     redis_host: str
     redis_port: int
 
+    env: str
     auth_jwt_algorithms = ["HS256"]
 
     class Config:
         env_file = f"{SRC_PATH}/.env"
         fields = {
-            'secret_key': {
-                'env': 'secret_key',
-            },
-            'mongo_url': {
-                'env': "mongo_url"
-            },
-            'redis_port': {
-                'env': "redis_port"
-            },
-            'redis_host': {
-                'env': "redis_host"
-            },
+            'secret_key': {'env': 'secret_key'},
+            'mongo_url': {'env': "mongo_url"},
+            'redis_port': {'env': "redis_port"},
+            'redis_host': {'env': "redis_host"},
+            'env': {"env": "env"},
         }
 
 

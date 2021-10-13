@@ -1,14 +1,19 @@
 from fastapi import FastAPI, Request, Response, HTTPException, status
 import httpx
 
-from context import get_services
+from context import get_services, get_settings
 
 internal_api = FastAPI(title="Internal API")
 
 
-INTERNAL_SERVICES = {
-    "auth": "http://127.0.0.3:120",
-    "service_discovery": "http://127.0.0.4:121"
+INTERNAL_SERVICES_PRODUCTION = {
+    "auth": "http://core-auth",
+    "service_discovery": "http://core-service-discovery"
+}
+
+INTERNAL_SERVICES_DEVELOPMENT = {
+    "auth": "http://127.0.0.2",
+    "service_discovery": "http://127.0.0.3"
 }
 
 
@@ -20,11 +25,13 @@ def update_services():
 @internal_api.route("/{service:str}/{p:path}", methods=["GET", "POST", "DELETE", "PUT"])
 async def service_proxy(r: Request):
     service = r.path_params["service"]
+    internal_services_url = INTERNAL_SERVICES_PRODUCTION \
+        if get_settings().env == "PRODUCTION" else INTERNAL_SERVICES_DEVELOPMENT
     try:
         async with httpx.AsyncClient() as client:
             service_response = await client.request(
                     method=r.method.lower(),
-                    url=f"{INTERNAL_SERVICES[service]}/{r.path_params['p']}",
+                    url=f"{internal_services_url[service]}/{r.path_params['p']}",
                     params=r.query_params,
                     cookies=r.cookies,
                     data=await r.body()
