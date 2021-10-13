@@ -12,7 +12,7 @@ SRC_PATH = path[2]
 class Settings(BaseSettings):
     secret_key: str
 
-    qwhale_token: str
+    mongo_url: str
 
     redis_host: str
     redis_port: int
@@ -25,8 +25,8 @@ class Settings(BaseSettings):
             'secret_key': {
                 'env': 'secret_key',
             },
-            'qwhale_token': {
-                'env': "qwhale_token"
+            'mongo_url': {
+                'env': "mongo_url"
             },
             'redis_port': {
                 'env': "redis_port"

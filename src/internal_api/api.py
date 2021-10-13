@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Request, Response
-from httpx import AsyncClient
+from fastapi import FastAPI, Request, Response, HTTPException, status
+import httpx
 
 from context import get_services
 
@@ -12,10 +12,6 @@ INTERNAL_SERVICES = {
 }
 
 
-def auth_client() -> AsyncClient:
-    return AsyncClient()
-
-
 def update_services():
     services = get_services()
     services.reload()
@@ -24,14 +20,17 @@ def update_services():
 @internal_api.route("/{service:str}/{p:path}", methods=["GET", "POST", "DELETE", "PUT"])
 async def service_proxy(r: Request):
     service = r.path_params["service"]
-    async with AsyncClient() as client:
-        service_response = await client.request(
-                method=r.method.lower(),
-                url=f"{INTERNAL_SERVICES[service]}/{r.path_params['p']}",
-                params=r.query_params,
-                cookies=r.cookies,
-                data=await r.body()
-            )
+    try:
+        async with httpx.AsyncClient() as client:
+            service_response = await client.request(
+                    method=r.method.lower(),
+                    url=f"{INTERNAL_SERVICES[service]}/{r.path_params['p']}",
+                    params=r.query_params,
+                    cookies=r.cookies,
+                    data=await r.body()
+                )
+    except (ConnectionError, httpx.ConnectError):
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
     response = Response(
         content=service_response.content,
         status_code=service_response.status_code,

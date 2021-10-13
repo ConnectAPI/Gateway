@@ -1,4 +1,4 @@
-from qwhale_client import APIClient
+from pymongo import MongoClient
 
 from context import get_settings
 
@@ -16,8 +16,8 @@ class MongoDB:
         if self.__class__._instance is not None:
             raise RuntimeError("Singleton all ready initialized ( use MongoDB.get_instance() )")
 
-        self._client = APIClient(get_settings().qwhale_token)
-        self.db = self._client.get_database()
+        self._client = MongoClient(get_settings().mongo_url)
+        self.db = self._client.get_database("gateway")
         self.services = self.db.get_collection("services")
 
     def close(self):
