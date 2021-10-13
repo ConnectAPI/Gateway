@@ -4,7 +4,7 @@ COPY . .
 
 RUN pip install -r requirements.txt --no-cache-dir
 
-EXPOSE 1687 80
+EXPOSE 80 1687
 
 ENV PYTHONPATH "${PYTHONPATH}:./src"
 
