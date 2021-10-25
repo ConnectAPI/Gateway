@@ -34,7 +34,7 @@ async def service_proxy(r: Request):
                     url=f"{internal_services_url[service]}/{r.path_params['p']}",
                     params=r.query_params,
                     cookies=r.cookies,
-                    headers=r.headers,
+                    headers={k: v for k, v in r.headers.items()},
                     data=await r.body()
                 )
     except (ConnectionError, httpx.ConnectError):
