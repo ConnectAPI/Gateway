@@ -1,16 +1,16 @@
 import jwt
 from fastapi import HTTPException, status, Request
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import APIKeyHeader
 
 from context import get_settings
 
 
-__all__ = ["OAuthJWTBearer", "auth_flow"]
+__all__ = ["JWTBearer", "auth_flow"]
 
 
-class OAuthJWTBearer(OAuth2PasswordBearer):
+class JWTBearer(APIKeyHeader):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(name="API-KEY", description="Authentication JWT key for services", *args, **kwargs)
         self.secret = get_settings().secret_key
 
     async def __call__(self, request: Request, required_scopes: list = None):
@@ -39,4 +39,4 @@ class OAuthJWTBearer(OAuth2PasswordBearer):
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-auth_flow = OAuthJWTBearer(tokenUrl="auth/token")
+auth_flow = JWTBearer()
