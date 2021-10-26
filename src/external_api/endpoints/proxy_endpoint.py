@@ -19,8 +19,8 @@ proxy_endpoint = APIRouter()
 
 async def proxy_request(request: FastAPIRequest):
     service = get_service(request)
-    request = await Request.from_fastapi_request(request)
     required_scopes = get_required_scopes(request, service)
+    request = await Request.from_fastapi_request(request)
     token = get_token(request, required_scopes)
     valid_request = is_valid_request(service, request)
 
