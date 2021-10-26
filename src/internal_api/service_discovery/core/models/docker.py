@@ -28,7 +28,7 @@ class DockerServicesManager:
         self.containers = {}
 
     def stop_container(self, service_name: str):
-        container = self.containers.get(service_name, None)
+        container = self.containers.pop(service_name, None)
         if container is None:
             raise ContainerNotFound(f'container for service "{service_name}" not found.')
         container.stop()
