@@ -38,8 +38,7 @@ async def service_proxy(r: Request):
                     data=await r.body()
                 )
     except (ConnectionError, httpx.ConnectError) as EX:
-        print(EX)
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(EX))
     response = Response(
         content=service_response.content,
         status_code=service_response.status_code,
