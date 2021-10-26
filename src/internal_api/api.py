@@ -1,44 +1,9 @@
-from fastapi import FastAPI, Request, Response, HTTPException, status
-import httpx
-
-from context import get_services, get_settings
+from fastapi import FastAPI
 
 from .service_discovery import service_discovery_api
+from .auth import auth_api
 
 internal_api = FastAPI(title="Internal API")
 
 internal_api.mount('/service_discovery', service_discovery_api)
-
-
-def update_services():
-    services = get_services()
-    services.reload()
-
-
-@internal_api.route("/{service:str}/{p:path}", methods=["GET", "POST", "DELETE", "PUT"])
-async def service_proxy(r: Request):
-    service = r.path_params["service"]
-    internal_services_url = INTERNAL_SERVICES_PRODUCTION \
-        if get_settings().env == "PRODUCTION" else INTERNAL_SERVICES_DEVELOPMENT
-    try:
-        async with httpx.AsyncClient() as client:
-            service_response = await client.request(
-                    method=r.method.lower(),
-                    url=f"{internal_services_url[service]}/{r.path_params['p']}",
-                    params=r.query_params,
-                    cookies=r.cookies,
-                    headers={k: v for k, v in r.headers.items()},
-                    data=await r.body()
-                )
-    except (ConnectionError, httpx.ConnectError) as EX:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(EX))
-    response = Response(
-        content=service_response.content,
-        status_code=service_response.status_code,
-        headers={k: v for k, v in service_response.headers.items()},
-    )
-
-    if service == "service_discovery":  # This is a hack, I know! and it will probably will never get fixed
-        if response.status_code < 300 and r.method.lower() != "get":
-            update_services()
-    return response
+internal_api.mount('/auth', auth_api)

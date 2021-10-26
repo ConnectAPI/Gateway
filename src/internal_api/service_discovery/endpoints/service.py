@@ -1,7 +1,9 @@
-from typing import Any
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, status, Depends
+
+from context import get_services
+from models.service import Service
 
 from ..core.models.db import get_db
 from ..core.schemas.service import NewService, ServiceModel
@@ -17,6 +19,7 @@ def remove(service_id: str, user_scopes: list = Depends(user_permissions)):
     db = get_db()
     service = db.services.find_one_and_delete({"id": service_id})
     if service is not None:
+        get_services().remove_service(service_id)
         docker_client().stop_container(service['name'])
     return {"removed": service is not None}
 
@@ -46,6 +49,8 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     new_service = ServiceModel(id=new_service_id, container_id=container.id, url=container_url, **service.dict())
     service_dict = new_service.dict(escape=True)
     db.services.insert_one(service_dict)
+    new_system_service = Service(new_service_id, service.name, new_service.url, new_service.openapi_spec)
+    get_services().add_service(new_system_service)
     return {"service_id": new_service_id}
 
 

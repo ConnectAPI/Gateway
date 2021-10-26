@@ -22,7 +22,7 @@ class Service:
         return list(operation["security"][0].values())
 
     def _build_openapi_spec(self):
-        self.openapi_dict["servers"] = [{"url": f"http://127.0.0.1:116/{self.prefix_path}"}]
+        self.openapi_dict["servers"] = [{"url": f"https://boxs.ml/{self.prefix_path}"}]
         openapi_spec = create_spec(self.openapi_dict)
         return openapi_spec
 

@@ -43,12 +43,16 @@ class Services:
         if service is not None:
             self.__services.pop(service.prefix_path)
 
-    def updated_service(self, service_id):
-        updated_service = self._load_service(service_id)
-        old_service = self.__services_by_id[service_id]
-        self.__services.pop(old_service.prefix_path)
-        self.__services_by_id[service_id] = updated_service
-        self.__services[updated_service.prefix_path] = updated_service
+    def add_service(self, service: Service):
+        self.__services[service.prefix_path] = service
+        self.__services_by_id[service.id] = service
+
+    # def updated_service(self, service_id):
+    #     updated_service = self._load_service(service_id)
+    #     old_service = self.__services_by_id[service_id]
+    #     self.__services.pop(old_service.prefix_path)
+    #     self.__services_by_id[service_id] = updated_service
+    #     self.__services[updated_service.prefix_path] = updated_service
 
     def get_service(self, prefix_path) -> Optional[Service]:
         return self.__services.get(prefix_path)
