@@ -9,6 +9,7 @@ from ..core.models.db import get_db
 from ..core.schemas.service import NewService, ServiceModel
 from ..core.models.docker import docker_client, NotAuthorizedContainer
 from ..autherization import user_permissions, raise_not_authorized
+from .validations import raise_if_service_name_exists, raise_if_service_name_if_forbidden
 
 service_endpoint = APIRouter(prefix="/service", tags=["service"])
 
@@ -28,8 +29,8 @@ def remove(service_id: str, user_scopes: list = Depends(user_permissions)):
 def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     raise_not_authorized(user_scopes, ["service:write"])
     db = get_db()
-    if db.services.find_one({"name": service.name}, {"_id": 1}):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="name are all ready exist.")
+    raise_if_service_name_if_forbidden(service.name)
+    raise_if_service_name_exists(db, service.name)
     new_service_id = str(uuid4())
     while db.services.find_one({"id": new_service_id}, {"_id": 1}) is not None:
         new_service_id = str(uuid4())
