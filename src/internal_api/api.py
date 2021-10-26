@@ -3,18 +3,11 @@ import httpx
 
 from context import get_services, get_settings
 
+from .service_discovery import service_discovery_api
+
 internal_api = FastAPI(title="Internal API")
 
-
-INTERNAL_SERVICES_PRODUCTION = {
-    "auth": "http://core-auth",
-    "service_discovery": "http://core-service-discovery"
-}
-
-INTERNAL_SERVICES_DEVELOPMENT = {
-    "auth": "http://127.0.0.2",
-    "service_discovery": "http://127.0.0.3"
-}
+internal_api.mount('/service_discovery', service_discovery_api)
 
 
 def update_services():
