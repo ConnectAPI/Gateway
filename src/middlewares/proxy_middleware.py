@@ -15,6 +15,7 @@ class ProxyMiddleware(BaseMiddleware):
             url=url,
             params=request.parameters.query,
             cookies=request.cookies,
+            headers={k: v for k, v in request.headers.items()}
         )
         response_content = service_response.content
         response = Response(
