@@ -13,12 +13,12 @@ ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"]
 proxy_endpoint = APIRouter()
 
 
-async def proxy_request(request: FastAPIRequest):
-    service = get_service(request)
-    required_scopes = get_required_scopes(request, service)
-    request = await Request.from_fastapi_request(request)
-    token = get_token(request, required_scopes)
+async def proxy_request(fast_api_request: FastAPIRequest):
+    service = get_service(fast_api_request)
+    request = await Request.from_fastapi_request(fast_api_request)
     valid_request = is_valid_request(service, request)
+    required_scopes = get_required_scopes(fast_api_request, service)
+    token = get_token(fast_api_request, required_scopes)
 
     url = urljoin(service.url, request.service_path)
     service.client.cookies.clear()  # Do not save state for security reasons

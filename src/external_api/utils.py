@@ -26,7 +26,7 @@ def get_required_scopes(r: FastAPIRequest, service):
     return scopes
 
 
-async def get_token(request: Request, required_scopes: list):
+async def get_token(request: FastAPIRequest, required_scopes: list):
     json_token: dict = await auth_flow(request, required_scopes=required_scopes)
     return json_token
 
