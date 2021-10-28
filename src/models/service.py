@@ -5,7 +5,7 @@ import httpx
 
 
 class Service:
-    def __init__(self, id: str, name: str, url: str, openapi_dict: dict):
+    def __init__(self, id: str, name: str, url: str, openapi_dict: dict, **kwargs):
         self.id: str = id
         self.name = name
         self.url = url
