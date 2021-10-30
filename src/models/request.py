@@ -24,7 +24,7 @@ class Request(OpenAPIRequest):
         self.base_url = base_url
         self.service_path = service_path
         self.path = path
-        self.full_url_pattern = str(base_url) + str(path)
+        self.full_url_pattern = str(base_url) + str(service_path)
 
         self.method = method.lower()
         self.mimetype = content_type
