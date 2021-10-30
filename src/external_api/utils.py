@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from copy import deepcopy
 
-from fastapi import Request as FastAPIRequest, HTTPException, status, Depends
+from fastapi import Request as FastAPIRequest, HTTPException, status
 from fastapi.responses import JSONResponse
 from openapi_core.validation.request.validators import RequestValidator
 
@@ -32,13 +32,11 @@ async def get_token(request: FastAPIRequest, required_scopes: list):
 
 
 async def is_valid_request(service, request):
-    print(service.openapi_spec, bool(service.openapi_spec), service.__dict__)
     if service.openapi_spec:
         validation_response = RequestValidator(service.openapi_spec).validate(request)
-        print(validation_response.errors)
         if validation_response.errors:
             response_content = [str(error) for error in validation_response.errors]
-            return JSONResponse(content=response_content, status_code=400)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response_content)
     return True
 
 
