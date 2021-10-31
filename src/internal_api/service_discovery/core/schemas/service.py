@@ -33,7 +33,6 @@ class ServiceModel(BaseModel):
     name: str
     image_name: str
     url: AnyHttpUrl
-    container_id: str
     environment_vars: dict
     openapi_spec: dict
     created_at: datetime = Field(default_factory=datetime.utcnow, description="creation time in UTC timezone")

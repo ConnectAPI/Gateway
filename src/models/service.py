@@ -5,19 +5,30 @@ import httpx
 
 
 class Service:
-    def __init__(self, id: str, name: str, url: str, openapi_dict: dict, **kwargs):
+    def __init__(
+            self,
+            id: str,
+            name: str,
+            url: str,
+            openapi_dict: dict,
+            image_name: str,
+            environment_vars: dict,
+            **kwargs,
+    ):
         self.id: str = id
         self.name = name
         self.url = url
         self.openapi_dict = openapi_dict
+        self.image_name = image_name
+        self.environment_vars = environment_vars
 
         self.prefix_path = name.lower()
         self.openapi_spec = self._build_openapi_spec()
         self.client = httpx.AsyncClient()
 
-    def get_required_scopes(self, path: str, operation: str) -> list:
+    def required_scopes(self, path: str, operation: str) -> list:
         operation = self.openapi_dict["paths"][path][operation]
-        if operation.get("security", None) is None:
+        if not operation.get("security", []):
             return []
         return list(operation["security"][0].values())
 

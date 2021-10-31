@@ -1,6 +1,7 @@
 from typing import Dict, Optional
 
 from .db import get_db
+from .docker import docker_client
 from models.service import Service
 
 __all__ = ["get_services", "Services"]
@@ -27,23 +28,43 @@ class Services:
     def _load_services(self):
         services = [
             Service.from_dict(service_dict)
-            for service_dict in self.db.services.find({}, {"_id": 0, "created_at": 0})
+            for service_dict in self.db.services.find({}, {"_id": 0})
         ]
         for service in services:
-            self.__services[service.prefix_path] = service
-            self.__services_by_id[service.id] = service
+            self.add_service(
+                service.id,
+                service.name,
+                service.url,
+                service.openapi_dict,
+                service.image_name,
+                service.environment_vars
+            )
 
-    def _load_service(self, service_id) -> Service:
-        db = get_db()
-        service_dict = db.services.find_one({"id": service_id}, {"_id": 0, "created_at": 0})
-        return Service.from_dict(service_dict)
+    def _activate_service(self, service: Service):
+        container = docker_client().run_container(service.image_name, service.environment_vars, service.name)
+
+    def _stop_service(self, service: Service):
+        docker_client().stop_container(service.name)
 
     def remove_service(self, service_id):
         service = self.__services_by_id.pop(service_id, None)
-        if service is not None:
-            self.__services.pop(service.prefix_path)
+        if service is None:
+            return
+        self._stop_service(service)
+        self.__services.pop(service.prefix_path)
+        self.__services_by_id.pop(service.id)
 
-    def add_service(self, service: Service):
+    def add_service(
+            self,
+            id: str,
+            name: str,
+            url: str,
+            openapi_dict: dict,
+            image_name: str,
+            environment_vars: dict,
+    ):
+        service = Service(id, name, url, openapi_dict, image_name, environment_vars)
+        # self._activate_service(service)
         self.__services[service.prefix_path] = service
         self.__services_by_id[service.id] = service
 
@@ -54,13 +75,11 @@ class Services:
     #     self.__services_by_id[service_id] = updated_service
     #     self.__services[updated_service.prefix_path] = updated_service
 
-    def get_service(self, prefix_path) -> Optional[Service]:
+    def get_service_by_prefix_path(self, prefix_path) -> Optional[Service]:
         return self.__services.get(prefix_path)
 
-    def reload(self):
-        self.__services.clear()
-        self.__services_by_id.clear()
-        self._load_services()
+    def shutdown(self):
+        docker_client().stop_all()
 
     def __iter__(self):
         return iter(self.__services.values())

@@ -3,11 +3,15 @@ from uuid import uuid4
 from fastapi import APIRouter, HTTPException, status, Depends
 
 from context import get_services
-from models.service import Service
+from context.docker import (
+    NotAuthorizedContainer,
+    ContainerNotFound,
+    ContainerAllReadyRunning,
+    ImageNotFound,
+)
 
 from ..core.models.db import get_db
 from ..core.schemas.service import NewService, ServiceModel
-from ..core.models.docker import docker_client, NotAuthorizedContainer
 from ..autherization import user_permissions, raise_not_authorized
 from .validations import raise_if_service_name_exists, raise_if_service_name_if_forbidden
 
@@ -19,10 +23,13 @@ def remove(service_id: str, user_scopes: list = Depends(user_permissions)):
     raise_not_authorized(user_scopes, ["service:delete"])
     db = get_db()
     service = db.services.find_one_and_delete({"id": service_id})
-    if service is not None:
+    if service is None:
+        return {"removed": False}
+    try:
         get_services().remove_service(service_id)
-        docker_client().stop_container(service['name'])
-    return {"removed": service is not None}
+    except ContainerNotFound:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='container not found')
+    return {"removed": True}
 
 
 @service_endpoint.put("", status_code=201)
@@ -31,27 +38,39 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     db = get_db()
     raise_if_service_name_if_forbidden(service.name)
     raise_if_service_name_exists(db, service.name)
+
     new_service_id = str(uuid4())
     while db.services.find_one({"id": new_service_id}, {"_id": 1}) is not None:
         new_service_id = str(uuid4())
+    service_url = f'http://{service.name}:{service.port}'
+    new_service = ServiceModel(id=new_service_id, url=service_url, **service.dict())
+    service_dict = new_service.dict(escape=True)
+    db.services.insert_one(service_dict)
+
     try:
-        container, container_url = docker_client().run_container(
+        get_services().add_service(
+            new_service_id,
+            service.name,
+            service_url,
+            new_service.openapi_spec,
             service.image_name,
             service.environment_vars,
-            service.name,
-            service.port,
         )
     except NotAuthorizedContainer:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Image name is not from boxs docker hub account."
         )
-
-    new_service = ServiceModel(id=new_service_id, container_id=container.id, url=container_url, **service.dict())
-    service_dict = new_service.dict(escape=True)
-    db.services.insert_one(service_dict)
-    new_system_service = Service(new_service_id, service.name, new_service.url, new_service.openapi_spec)
-    get_services().add_service(new_system_service)
+    except ContainerAllReadyRunning:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Container with that name ('{service.name}') is all ready running."
+        )
+    except ImageNotFound:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Service image ('{service.image_name}') not found."
+        )
     return {"service_id": new_service_id}
 
 

@@ -13,7 +13,7 @@ from .security import auth_flow
 def get_service(request: FastAPIRequest):
     services = get_services()
     service_prefix_path = request.path_params["p"].split("/")[0]
-    service = services.get_service(service_prefix_path.lower())
+    service = services.get_service_by_prefix_path(service_prefix_path.lower())
     if service is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="service not found")
     return service
@@ -22,7 +22,7 @@ def get_service(request: FastAPIRequest):
 def get_required_scopes(r: FastAPIRequest, service):
     full_path = r.path_params['p']
     service_path = full_path[r.path_params['p'].find(service.prefix_path) + len(service.prefix_path):]
-    scopes = service.get_required_scopes(service_path, r.method.lower())
+    scopes = service.required_scopes(service_path, r.method.lower())
     return scopes
 
 
