@@ -52,7 +52,6 @@ class Services:
             return
         self._stop_service(service)
         self.__services.pop(service.prefix_path)
-        self.__services_by_id.pop(service.id)
 
     def add_service(
             self,
