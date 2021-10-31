@@ -21,3 +21,4 @@ def initiate():
 
 def cleanup():
     get_db().close()
+    get_services().shutdown()
