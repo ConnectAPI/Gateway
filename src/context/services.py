@@ -64,7 +64,7 @@ class Services:
             environment_vars: dict,
     ):
         service = Service(id, name, url, openapi_dict, image_name, environment_vars)
-        # self._activate_service(service)
+        self._activate_service(service)
         self.__services[service.prefix_path] = service
         self.__services_by_id[service.id] = service
 
