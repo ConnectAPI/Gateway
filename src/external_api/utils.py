@@ -2,7 +2,6 @@ from typing import Dict, Any
 from copy import deepcopy
 
 from fastapi import Request as FastAPIRequest, HTTPException, status
-from fastapi.responses import JSONResponse
 from openapi_core.validation.request.validators import RequestValidator
 
 from context import get_services
@@ -11,9 +10,8 @@ from .security import auth_flow
 
 
 def get_service(request: FastAPIRequest):
-    services = get_services()
     service_prefix_path = request.path_params["p"].split("/")[0]
-    service = services.get_service_by_prefix_path(service_prefix_path.lower())
+    service = get_services().get_service_by_prefix_path(service_prefix_path.lower())
     if service is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="service not found")
     return service
@@ -31,7 +29,7 @@ async def get_token(request: FastAPIRequest, required_scopes: list):
     return json_token
 
 
-async def is_valid_request(service, request):
+async def is_valid_request(service, request: Request):
     if service.openapi_spec:
         validation_response = RequestValidator(service.openapi_spec).validate(request)
         if validation_response.errors:
