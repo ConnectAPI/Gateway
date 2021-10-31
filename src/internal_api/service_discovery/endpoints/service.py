@@ -84,24 +84,6 @@ def get(service_id: str, user_scopes: list = Depends(user_permissions)):
     return ServiceModel(**service_dict).dict()
 
 
-# @service_endpoint.patch("")
-# def update(service_id: str, field: str, value: Any, user_scopes: list = Depends(user_permissions)):
-#     raise_not_authorized(user_scopes, ["service:write", "service:delete"])
-#     db = get_db()
-#     if field in ("id", ):
-#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"cant update field '{field}'")
-#     service_dict = db.services.find_one({"id": service_id}, {"_id": 0})
-#     service = ServiceModel(**service_dict)
-#     try:
-#         setattr(service, field, value)
-#     except ValueError:
-#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Field not exist or invalid value")
-#
-#     updated_value = service.dict(escape=True)[field]
-#     updated_result = db.services.update_one({"id": service_id}, {"$set": {field: updated_value}})
-#     return {"updated": updated_result.modified_count > 0}
-
-
 @service_endpoint.get("/list")
 def service_list(user_scopes: list = Depends(user_permissions)):
     raise_not_authorized(user_scopes, ["service:read"])
