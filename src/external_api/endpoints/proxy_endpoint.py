@@ -18,6 +18,7 @@ async def proxy_request(fast_api_request: FastAPIRequest):
     request = await Request.from_fastapi_request(fast_api_request)
     valid_request = await is_valid_request(service, request)
     required_scopes = get_required_scopes(fast_api_request, service)
+    print(fast_api_request.headers)
     token = await get_token(fast_api_request, required_scopes)
     print(token)
 
