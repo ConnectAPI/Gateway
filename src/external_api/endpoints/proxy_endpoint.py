@@ -19,6 +19,7 @@ async def proxy_request(fast_api_request: FastAPIRequest):
     valid_request = await is_valid_request(service, request)
     required_scopes = get_required_scopes(fast_api_request, service)
     token = await get_token(fast_api_request, required_scopes)
+    print(token)
 
     url = urljoin(service.url, request.service_path)
     service.client.cookies.clear()  # Do not save state for security reasons
@@ -30,6 +31,7 @@ async def proxy_request(fast_api_request: FastAPIRequest):
         cookies=request.cookies,
         headers={k: v for k, v in request.headers.items()}
     )
+    print(service_response.text, service_response.status_code)
     response_content = service_response.content
     response = Response(
         content=response_content,
