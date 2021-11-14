@@ -21,15 +21,15 @@ async def proxy_request(fast_api_request: FastAPIRequest):
     token = await get_token(fast_api_request, required_scopes)
 
     url = urljoin(service.url, request.service_path)
-    print(url)
     service.client.cookies.clear()  # Do not save state for security reasons
     service.client.headers.clear()
     service_response = await service.client.request(
         request.method,
         url=url,
+        data=request.body,
         params=request.parameters.query,
         cookies=request.cookies,
-        #headers={k: v for k, v in request.headers.items()}
+        headers={k: v for k, v in request.headers.items()}
     )
     response_content = service_response.content
     response = Response(
