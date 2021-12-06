@@ -3,8 +3,8 @@ from functools import lru_cache
 
 from .db import get_db
 from .docker import docker_client, DockerException
+from .service import Service
 from ..settings import get_settings
-from models.service import Service
 
 __all__ = ["get_services", "Services"]
 

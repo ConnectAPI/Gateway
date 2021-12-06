@@ -2,7 +2,7 @@ from urllib.parse import urljoin
 
 from fastapi import APIRouter, Response, Request as FastAPIRequest
 
-from models.request import Request
+from core.models.request import Request
 
 from ..utils import get_service, is_valid_request, get_token, get_required_scopes
 

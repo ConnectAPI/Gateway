@@ -1,11 +1,8 @@
-from typing import Dict, Any
-from copy import deepcopy
-
 from fastapi import Request as FastAPIRequest, HTTPException, status
 from openapi_core.validation.request.validators import RequestValidator
 
 from internal_api.service_discovery import get_services
-from models.request import Request
+from core.models.request import Request
 
 from .security import auth_flow
 
