@@ -8,4 +8,6 @@ EXPOSE 80 1687
 
 ENV PYTHONPATH "${PYTHONPATH}:./src"
 
-CMD ["python", "-m", "src"]
+WORKDIR ./src
+
+CMD ["python", "run.py"]
