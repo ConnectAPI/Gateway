@@ -13,6 +13,8 @@ class Settings(BaseSettings):
 
     jwt_algorithms: list = ["HS256"]
 
+    debug = True
+
     class Config:
         env_file: str = ENV_FILE_PATH
         fields = {

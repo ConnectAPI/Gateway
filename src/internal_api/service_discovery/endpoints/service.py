@@ -2,8 +2,8 @@ from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, status, Depends
 
-from context import get_services
-from context.docker import (
+from ..core.models.services import get_services
+from ..core.models.docker import (
     NotAuthorizedContainer,
     ContainerNotFound,
     ContainerAllReadyRunning,
@@ -26,7 +26,7 @@ def remove(service_id: str, user_scopes: list = Depends(user_permissions)):
     if service is None:
         return {"removed": False}
     try:
-        get_services().remove_service(service_id)
+        get_services().remove(service_id)
     except ContainerNotFound:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='container not found')
     return {"removed": True}
@@ -48,7 +48,7 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     db.services.insert_one(service_dict)
 
     try:
-        get_services().add_service(
+        get_services().add(
             new_service_id,
             service.name,
             service_url,
@@ -82,6 +82,20 @@ def get(service_id: str, user_scopes: list = Depends(user_permissions)):
     if service_dict is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"service with id '{service_id}' not found")
     return ServiceModel(**service_dict).dict()
+
+
+@service_endpoint.post("/pause")
+def pause(service_id: str, user_scopes: list = Depends(user_permissions)):
+    raise_not_authorized(user_scopes, ["service:delete"])
+    get_services().pause(service_id)
+    return {"pause": True}
+
+
+@service_endpoint.post("/unpause")
+def pause(service_id: str, user_scopes: list = Depends(user_permissions)):
+    raise_not_authorized(user_scopes, ["service:delete"])
+    get_services().pause(service_id)
+    return {"unpause": True}
 
 
 @service_endpoint.get("/list")

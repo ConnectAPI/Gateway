@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 import docker
-
+from docker.errors import DockerException
 
 __all__ = [
     'docker_client',
@@ -9,6 +9,7 @@ __all__ = [
     'ContainerAllReadyRunning',
     'ContainerNotFound',
     'ImageNotFound',
+    "DockerException"
 ]
 
 
@@ -39,6 +40,18 @@ class DockerServicesManager:
             raise ContainerNotFound(f'container for service "{service_name}" not found.')
         container.stop()
         container.remove()
+
+    def pause(self, service_name: str):
+        container = self.containers.pop(service_name, None)
+        if container is None:
+            raise ContainerNotFound(f'container for service "{service_name}" not found.')
+        container.pause()
+
+    def unpause(self, service_name: str):
+        container = self.containers.pop(service_name, None)
+        if container is None:
+            raise ContainerNotFound(f'container for service "{service_name}" not found.')
+        container.unpause()
 
     @staticmethod
     def allowed_docker_image(image_name: str):

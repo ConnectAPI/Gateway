@@ -2,7 +2,7 @@ import jwt
 from fastapi import HTTPException, status, Request
 from fastapi.security import APIKeyHeader
 
-from context import get_settings
+from core.settings import get_settings
 
 
 __all__ = ["JWTBearer", "auth_flow"]

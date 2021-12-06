@@ -4,14 +4,15 @@ from copy import deepcopy
 from fastapi import Request as FastAPIRequest, HTTPException, status
 from openapi_core.validation.request.validators import RequestValidator
 
-from context import get_services
+from internal_api.service_discovery import get_services
 from models.request import Request
+
 from .security import auth_flow
 
 
 def get_service(request: FastAPIRequest):
     service_prefix_path = request.path_params["p"].split("/")[0]
-    service = get_services().get_service_by_prefix_path(service_prefix_path.lower())
+    service = get_services().get_by_prefix_path(service_prefix_path.lower())
     if service is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="service not found")
     return service
@@ -36,43 +37,3 @@ async def is_valid_request(service, request: Request):
             response_content = [str(error) for error in validation_response.errors]
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response_content)
     return True
-
-
-def openapi_schema():
-    services = get_services()
-    merged_schema: Dict[str, Any] = {
-        "openapi": "3.0.2",
-        "info": {
-                "title": "APIGateway",
-                "version": "0.1.0"
-            },
-        "servers": [],
-        "security": [
-            {"auth": []}
-        ],
-        "paths": {},
-        "components": {
-            "schemas": {},
-            "securitySchemes": {
-                "auth": {
-                    "type": "oauth2",
-                    "flows": {
-                        "password": {
-                                "scopes": {},
-                                "tokenUrl": "internal/auth/token",
-                                "refreshUrl": "internal/auth/refresh_token",
-                            }
-                    }
-                }
-            }
-        },
-    }
-    for service in services:
-        schema = deepcopy(service.openapi_dict)
-        for path, data in schema["paths"].items():
-            for operation in data.values():
-                operation.pop("tags", None)
-                operation["tags"] = [service.name]
-            merged_schema["paths"]['/' + service.prefix_path + path] = data
-        merged_schema["components"]["schemas"].update(schema.get("components", {}).get("schemas"))
-    return merged_schema
