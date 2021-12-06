@@ -25,3 +25,22 @@ With the openapi the service also contain link to a docker image.
 
 The gateway is running the docker image on a virtual network and used as a proxy to it.
 
+
+### File structure
+```
+├───core
+│   └───models
+├───external_api // API the application suposed to access
+│   └───endpoints // routes
+├───internal_api // API for the dashboard and server side
+│   ├───auth // authentication service, handling permission tokens
+│   │   ├───core 
+│   │   │   ├───models
+│   │   │   └───schemas // data models
+│   │   └───endpoints // routes
+│   ├───service_discovery // managing the plugin services
+│   │   ├───core
+│   │   │   ├───models
+│   │   │   ├───schemas // data models
+└───└───└───endpoints // routes
+```
