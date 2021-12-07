@@ -12,6 +12,7 @@ class ProxyRequest(OpenAPIRequest):
             self,
             base_url,
             service_path,
+            service_name,
             path,
             method: str,
             client,
@@ -21,10 +22,12 @@ class ProxyRequest(OpenAPIRequest):
             headers,
             cookies: dict,
     ):
-        self.base_url = base_url
-        self.service_path = service_path
-        self.path = path
-        self.full_url_pattern = str(base_url) + str(path)
+                                                            # E.G: full url http://boxs.ml/users/user/{userId}
+        self.base_url = base_url                            # E.G: http://boxs.ml/
+        self.path = path                                    # E.G: users/user/{userId}
+        self.service_path = service_path                    # E.G: user/{userId}
+        self.service_name = service_name                    # E.G: users
+        self.full_url_pattern = str(base_url) + str(path)   # E.G: http://boxs.ml/users/user/{userId}
 
         self.method = method.lower()
         self.mimetype = content_type
@@ -38,8 +41,9 @@ class ProxyRequest(OpenAPIRequest):
 
     @classmethod
     async def from_fastapi_request(cls, r: FastAPIRequest):
-        request_path = r.path_params["p"]  # Example: "users/block"
-        service_path = ''.join(request_path.split("/")[1:])  # Example: "block"
+        request_path = r.path_params["p"]  # Example: "users/block/{userId}"
+        service_path = request_path[request_path.find("/")+1:]  # Example: "block/{userId}"
+        service_name = request_path.split("/")[0]
 
         query_params = {k: v for k, v in r.query_params.items()}
         full_content_type = r.headers.get("Content-Type")
@@ -50,6 +54,7 @@ class ProxyRequest(OpenAPIRequest):
         return cls(
             base_url=r.base_url,
             service_path=service_path,
+            service_name=service_name,
             path=request_path,
             headers=headers,
             client=r.client,
