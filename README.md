@@ -16,6 +16,7 @@ Gateway responsible for:
 2. authentication
 3. validation (validating request against openapi spec)
 4. rate limit
+5. monitoring
 
 
 ### How it works?
