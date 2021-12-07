@@ -30,6 +30,7 @@ class Services:
                 service.image_name,
                 service.environment_vars
             )
+            print(service.name)
 
     def _activate(self, service: Service):
         container = docker_client().run_container(service.image_name, service.environment_vars, service.name)
