@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from copy import deepcopy
 
-from internal_api.service_discovery import get_services
+from .core.models.services import get_services
 
 
 def openapi_schema():

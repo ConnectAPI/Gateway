@@ -6,8 +6,7 @@ from core.models.cache import get_cache
 from external_api import proxy_router
 from internal_api import internal_api
 from internal_api.service_discovery import get_services
-
-from openapi import openapi_schema
+from internal_api.service_discovery.openapi import openapi_schema
 
 
 app = FastAPI(title="Gateway")
