@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     env: str
     auth_jwt_algorithms = ["HS256"]
 
-    host: str = "127.0.0.1"
+    host: str = "0.0.0.0"
     port: int = 80
 
     class Config:
