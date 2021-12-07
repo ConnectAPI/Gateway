@@ -22,7 +22,6 @@ class Service:
         self.image_name = image_name
         self.environment_vars = environment_vars
 
-        self.prefix_path = name.lower()
         self.openapi_spec = self._build_openapi_spec()
         self.client = httpx.AsyncClient()
 

@@ -42,7 +42,7 @@ class Services:
         if service is None:
             return
         self._stop(service)
-        self.__services.pop(service.prefix_path)
+        self.__services.pop(service.name.lower())
 
     def add(
             self,
@@ -61,11 +61,12 @@ class Services:
                 raise
             print("Warning: docker error", DE)
             return
-        self.__services[service.prefix_path] = service
+        self.__services[service.name.lower()] = service
         self.__services_by_id[service.id] = service
 
-    def get_by_prefix_path(self, prefix_path) -> Optional[Service]:
-        return self.__services.get(prefix_path)
+    def get_by_name(self, name) -> Optional[Service]:
+        """Get service by lower name (service_name.lower())"""
+        return self.__services.get(name)
 
     def pause(self, id: str):
         service = self.__services_by_id[id]

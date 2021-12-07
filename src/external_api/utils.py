@@ -10,7 +10,7 @@ from .security import auth_flow
 
 
 def get_service(request: ProxyRequest):
-    service = get_services().get_by_prefix_path(request.service_path.lower())
+    service = get_services().get_by_name(request.service_name.lower())
     if service is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="service not found")
     return service
