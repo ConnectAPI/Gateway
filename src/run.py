@@ -1,8 +1,11 @@
 from uvicorn import run
 
+from core.settings import get_settings
+
 
 def main():
-    run("api:app", host="0.0.0.0", port=80)
+    settings = get_settings()
+    run("api:app", host=settings.host, port=settings.port)
 
 
 if __name__ == "__main__":
