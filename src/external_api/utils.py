@@ -18,7 +18,7 @@ def get_service(request: ProxyRequest):
 
 def _get_required_scopes(r: Request, service):
     full_path = r.path_params['p']
-    service_path = full_path[r.path_params['p'].find(service.name.lower()) + len(service.prefix_path):]
+    service_path = full_path[r.path_params['p'].find(service.name.lower()) + len(service.name):]
     scopes = service.required_scopes(service_path, r.method.lower())
     return scopes
 
