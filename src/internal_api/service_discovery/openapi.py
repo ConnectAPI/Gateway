@@ -39,6 +39,6 @@ def openapi_schema():
             for operation in data.values():
                 operation.pop("tags", None)
                 operation["tags"] = [service.name]
-            merged_schema["paths"]['/' + service.prefix_path + path] = data
+            merged_schema["paths"]['/' + service.name.lower() + path] = data
         merged_schema["components"]["schemas"].update(schema.get("components", {}).get("schemas"))
     return merged_schema
