@@ -1,75 +1,65 @@
-from urllib.parse import urljoin
+from fastapi import APIRouter, Request
 
-from fastapi import APIRouter, Response, Request as FastAPIRequest
+from ..proxy_request import ProxyRequest
 
-from core.models.request import Request
-
-from ..utils import get_service, is_valid_request, get_token, get_required_scopes
-
-
-ALLOWED_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"]
-
+from ..utils import (
+    get_service,
+    raise_on_invalid_request,
+    raise_on_insufficient_permissions,
+    forward_request,
+)
 
 proxy_endpoint = APIRouter()
 
 
-async def proxy_request(fast_api_request: FastAPIRequest):
-    service = get_service(fast_api_request)
-    request = await Request.from_fastapi_request(fast_api_request)
-    valid_request = await is_valid_request(service, request)
-    required_scopes = get_required_scopes(fast_api_request, service)
-    token = await get_token(fast_api_request, required_scopes)
+async def proxy_request(request: Request):
+    """
+    Every request that need to access one of the services is going through here
+    this method is responsible for validation and checking the request permissions.
+    :param request:
+    :return: The response from the internal service
+    """
+    p_request = await ProxyRequest.from_fastapi_request(request)  # The ProxyRequest object have some useful methods
+    service = get_service(p_request)  # Load service object from the service_discovery service
+    await raise_on_invalid_request(service, p_request)  # Validate the request against the service openapi spec
 
-    url = urljoin(service.url, request.service_path)
-    service.client.cookies.clear()  # Do not save state for security reasons
-    service.client.headers.clear()
-    service_response = await service.client.request(
-        request.method,
-        url=url,
-        data=request.body,
-        params=request.parameters.query,
-        cookies=request.cookies,
-        headers={k: v for k, v in request.headers.items()}
-    )
-    response_content = service_response.content
-    response = Response(
-        content=response_content,
-        status_code=service_response.status_code,
-        headers={k: v for k, v in service_response.headers.items()},
-    )
+    # Check if the request jwt key have the needed permissions
+    await raise_on_insufficient_permissions(request, service)
+
+    response = await forward_request(p_request, service)
     return response
 
 
 @proxy_endpoint.get("/{p:path}", name="get", include_in_schema=False)
-async def get_method_proxy(request: FastAPIRequest):
+async def get_method_proxy(request: Request):
     return await proxy_request(request)
 
 
 @proxy_endpoint.post("/{p:path}", name="post", include_in_schema=False)
-async def post_method_proxy(request: FastAPIRequest):
+async def post_method_proxy(request: Request):
     return await proxy_request(request)
 
 
 @proxy_endpoint.put("/{p:path}", name="put", include_in_schema=False)
-async def put_method_proxy(request: FastAPIRequest):
+async def put_method_proxy(request: Request):
     return await proxy_request(request)
 
 
 @proxy_endpoint.delete("/{p:path}", name="delete", include_in_schema=False)
-async def delete_method_proxy(request: FastAPIRequest):
+async def delete_method_proxy(request: Request):
     return await proxy_request(request)
 
 
 @proxy_endpoint.options("/{p:path}", name="options", include_in_schema=False)
-async def options_method_proxy(request: FastAPIRequest):
+async def options_method_proxy(request: Request):
     return await proxy_request(request)
 
 
 @proxy_endpoint.head("/{p:path}", name="head", include_in_schema=False)
-async def head_method_proxy(request: FastAPIRequest):
+async def head_method_proxy(request: Request):
     return await proxy_request(request)
 
 
 @proxy_endpoint.patch("/{p:path}", name="patch", include_in_schema=False)
-async def patch_method_proxy(request: FastAPIRequest):
+async def patch_method_proxy(request: Request):
     return await proxy_request(request)

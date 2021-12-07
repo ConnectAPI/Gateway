@@ -19,13 +19,6 @@ class JWTBearer(APIKeyHeader):
         token = await super().__call__(request)
         try:
             json_token = jwt.decode(token, self.secret, algorithms=get_settings().auth_jwt_algorithms)
-            for scope in required_scopes:
-                if scope not in json_token["scopes"]:
-                    raise HTTPException(
-                        status_code=status.HTTP_401_UNAUTHORIZED,
-                        detail=f"Do not have permission for scope '{scope}'"
-                    )
-            return json_token
         except jwt.ExpiredSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -38,5 +31,12 @@ class JWTBearer(APIKeyHeader):
                 detail="invalid token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        for scope in required_scopes:
+            if scope not in json_token["scopes"]:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"Do not have permission for scope '{scope}'"
+                )
+        return json_token
 
 auth_flow = JWTBearer()
