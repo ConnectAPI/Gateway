@@ -3,6 +3,8 @@ from functools import lru_cache
 import docker
 from docker.errors import DockerException
 
+from ..settings import get_settings
+
 __all__ = [
     'docker_client',
     'NotAuthorizedContainer',
@@ -57,7 +59,7 @@ class DockerServicesManager:
     def allowed_docker_image(image_name: str):
         """
         Check if the docker image is from box's github account
-        :param image_name: the name of the image e.g "boxs/some_image_name"
+        :param image_name: the name of the image e.g "ConnectAPI/some_image_name"
         :return: bool
         """
         return True
@@ -78,7 +80,7 @@ class DockerServicesManager:
         if service_name in self.containers:
             raise ContainerAllReadyRunning(f'Container {service_name} is all ready running.')
         if not self.allowed_docker_image(image_name):
-            raise NotAuthorizedContainer(f'{image_name} is not from boxs docker hub account.')
+            raise NotAuthorizedContainer(f'{image_name} is not from ConnectAPI docker hub account.')
         image = self.pull_image(image_name)
         if image is None:
             raise ImageNotFound(f'Image {image_name} not found on local memory and docker hub.')
@@ -86,7 +88,7 @@ class DockerServicesManager:
             image.short_id,
             name=service_name,
             detach=True,
-            network='boxs_core',
+            network=get_settings().docker_network_name,
             hostname=service_name,
             environment=environment,
         )

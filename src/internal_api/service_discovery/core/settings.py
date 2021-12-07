@@ -15,6 +15,8 @@ class Settings(BaseSettings):
 
     debug = True
 
+    docker_network_name: str = "ConnectAPI"
+
     class Config:
         env_file: str = ENV_FILE_PATH
         fields = {
