@@ -24,7 +24,7 @@ def remove(service_id: str, user_scopes: list = Depends(user_permissions)):
     db = get_db()
     service = db.services.find_one_and_delete({"id": service_id})
     if service is None:
-        return {"removed": False}
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"service with id {service_id} not found")
     try:
         get_services().remove(service_id)
     except ContainerNotFound:
@@ -40,7 +40,7 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     raise_if_service_name_exists(db, service.name)
 
     service_url = f'http://{service.name}:{service.port}'
-    new_service = ServiceModel(id=service.id, url=service_url, **service.dict())
+    new_service = ServiceModel(url=service_url, **service.dict())
     service_dict = new_service.dict(escape=True)
     db.services.insert_one(service_dict)
 
