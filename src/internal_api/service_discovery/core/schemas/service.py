@@ -7,6 +7,7 @@ from pydantic import BaseModel, constr, Field, AnyHttpUrl, validator
 
 
 class NewService(BaseModel):
+    id: constr(max_length=100)
     name: constr(max_length=40)
     image_name: str
     environment_vars: dict = Field(default_factory=dict)

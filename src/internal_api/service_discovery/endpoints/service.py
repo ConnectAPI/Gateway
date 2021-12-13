@@ -28,7 +28,7 @@ def remove(service_id: str, user_scopes: list = Depends(user_permissions)):
     try:
         get_services().remove(service_id)
     except ContainerNotFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='container not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='service not found')
     return {"removed": True}
 
 
@@ -39,17 +39,14 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     raise_if_service_name_if_forbidden(service.name)
     raise_if_service_name_exists(db, service.name)
 
-    new_service_id = str(uuid4())
-    while db.services.find_one({"id": new_service_id}, {"_id": 1}) is not None:
-        new_service_id = str(uuid4())
     service_url = f'http://{service.name}:{service.port}'
-    new_service = ServiceModel(id=new_service_id, url=service_url, **service.dict())
+    new_service = ServiceModel(id=service.id, url=service_url, **service.dict())
     service_dict = new_service.dict(escape=True)
     db.services.insert_one(service_dict)
 
     try:
         get_services().add(
-            new_service_id,
+            service.id,
             service.name,
             service_url,
             new_service.openapi_spec,
@@ -71,7 +68,7 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Service image ('{service.image_name}') not found."
         )
-    return {"service_id": new_service_id}
+    return {"service_id": service.id}
 
 
 @service_endpoint.get("")

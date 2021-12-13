@@ -50,7 +50,7 @@ def create_token(
     token = Token(scopes=new_key.scopes)
     encoded_token = create_jwt_token(token.scopes, token.tid)
     db.tokens.insert_one(token.dict())
-    return {"created": encoded_token, "id": token.tid, "refresh_token": token.refresh_token}
+    return {"token": encoded_token, "id": token.tid, "refresh_token": token.refresh_token}
 
 
 @token_endpoint.delete("")
