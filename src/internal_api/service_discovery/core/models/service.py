@@ -13,7 +13,6 @@ class Service:
             openapi_dict: dict,
             image_name: str,
             environment_vars: dict,
-            port: int,
             **kwargs,
     ):
         self.id: str = id
@@ -22,7 +21,6 @@ class Service:
         self.openapi_dict = openapi_dict
         self.image_name = image_name
         self.environment_vars = environment_vars
-        self.port = port
 
         self.openapi_spec = self._build_openapi_spec()
         self.client = httpx.AsyncClient()

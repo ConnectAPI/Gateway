@@ -38,7 +38,6 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     raise_if_service_name_exists(db, service.name)
 
     service_url = f'http://{service.name.replace(" ", "_")}:{service.port}'
-    print(service_url)
     new_service = ServiceModel(url=service_url, **service.dict())
     service_dict = new_service.dict(escape=True)
     db.services.insert_one(service_dict)
@@ -51,7 +50,6 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
             new_service.openapi_spec,
             service.image_name,
             service.environment_vars,
-            service.port
         )
     except NotAuthorizedContainer:
         raise HTTPException(
