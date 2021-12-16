@@ -40,6 +40,7 @@ class Service:
 
     @classmethod
     def from_dict(cls, service_dict: dict):
+        print(service_dict)
         if type(service_dict.get("openapi_spec", None)) is str:
             service_dict["openapi_spec"] = json.loads(service_dict["openapi_spec"])
         service_dict["openapi_dict"] = service_dict.pop("openapi_spec")
