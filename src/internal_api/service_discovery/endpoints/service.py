@@ -52,6 +52,7 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
             new_service.openapi_spec,
             service.image_name,
             service.environment_vars,
+            service.port
         )
     except NotAuthorizedContainer:
         raise HTTPException(

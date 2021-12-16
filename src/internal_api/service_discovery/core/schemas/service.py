@@ -36,6 +36,7 @@ class ServiceModel(BaseModel):
     url: AnyHttpUrl
     environment_vars: dict
     openapi_spec: dict
+    port: int
     created_at: datetime = Field(default_factory=datetime.utcnow, description="creation time in UTC timezone")
 
     @validator("openapi_spec", whole=True, pre=True)
