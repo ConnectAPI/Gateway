@@ -32,6 +32,7 @@ class Services:
             )
 
     def _activate(self, service: Service):
+        print(service.port, service.name)
         container = docker_client().run_container(
             service.image_name,
             service.environment_vars,
