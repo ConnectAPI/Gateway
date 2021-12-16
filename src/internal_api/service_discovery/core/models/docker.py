@@ -91,7 +91,7 @@ class DockerServicesManager:
             network=get_settings().docker_network_name,
             hostname=service_name,
             environment=environment,
-            ports={"80": bind_port},
+            ports={bind_port: "80"},
         )
         self.containers[service_name] = container
         return container
