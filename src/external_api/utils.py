@@ -45,7 +45,6 @@ async def forward_request(p_request, service) -> Response:
     :return: The service response
     """
     url = urljoin(service.url, p_request.service_path)
-    print(url, service.name)
     service.client.cookies.clear()  # Do not save state for security reasons
     service.client.headers.clear()
     service_response = await service.client.request(
