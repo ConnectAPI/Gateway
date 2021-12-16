@@ -20,7 +20,7 @@ app.include_router(proxy_router)
 async def startup():
     get_db()
     get_cache()
-    get_services()
+    get_services().load_services()
 
 
 @app.on_event("shutdown")

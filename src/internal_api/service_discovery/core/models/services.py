@@ -14,9 +14,8 @@ class Services:
         self.db = get_db()
         self.__services: Dict[str, Service] = {}
         self.__services_by_id: Dict[str, Service] = {}
-        self._load_services()
 
-    def _load_services(self):
+    def load_services(self):
         services = [
             Service.from_dict(service_dict)
             for service_dict in self.db.services.find({}, {"_id": 0})
