@@ -43,4 +43,4 @@ class Service:
         if type(service_dict.get("openapi_spec", None)) is str:
             service_dict["openapi_spec"] = json.loads(service_dict["openapi_spec"])
         service_dict["openapi_dict"] = service_dict.pop("openapi_spec")
-        return cls(**service_dict, port=service_dict["config"]["port"])
+        return cls(**service_dict)
