@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from fastapi import APIRouter, HTTPException, status, Depends
 
 from ..core.models.services import get_services
