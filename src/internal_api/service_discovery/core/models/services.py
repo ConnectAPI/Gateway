@@ -27,11 +27,17 @@ class Services:
                 service.url,
                 service.openapi_dict,
                 service.image_name,
-                service.environment_vars
+                service.environment_vars,
+                service.port,
             )
 
     def _activate(self, service: Service):
-        container = docker_client().run_container(service.image_name, service.environment_vars, service.name)
+        container = docker_client().run_container(
+            service.image_name,
+            service.environment_vars,
+            service.name,
+            bind_port=service.port,
+        )
 
     def _stop(self, service: Service):
         docker_client().stop_container(service.name)
@@ -51,8 +57,9 @@ class Services:
             openapi_dict: dict,
             image_name: str,
             environment_vars: dict,
+            port: int,
     ):
-        service = Service(id, name, url, openapi_dict, image_name, environment_vars)
+        service = Service(id, name, url, openapi_dict, image_name, environment_vars, port)
         try:
             self._activate(service)
         except DockerException as DE:

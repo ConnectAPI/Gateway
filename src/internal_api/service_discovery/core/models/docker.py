@@ -76,7 +76,7 @@ class DockerServicesManager:
         except Exception:
             return None
 
-    def run_container(self, image_name: str, environment: dict, service_name: str):
+    def run_container(self, image_name: str, environment: dict, service_name: str, bind_port: int):
         if service_name in self.containers:
             raise ContainerAllReadyRunning(f'Container {service_name} is all ready running.')
         if not self.allowed_docker_image(image_name):
@@ -91,6 +91,7 @@ class DockerServicesManager:
             network=get_settings().docker_network_name,
             hostname=service_name,
             environment=environment,
+            ports={"80": bind_port},
         )
         self.containers[service_name] = container
         return container

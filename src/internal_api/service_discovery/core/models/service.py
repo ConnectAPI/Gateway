@@ -13,6 +13,7 @@ class Service:
             openapi_dict: dict,
             image_name: str,
             environment_vars: dict,
+            port: int,
             **kwargs,
     ):
         self.id: str = id
@@ -21,6 +22,7 @@ class Service:
         self.openapi_dict = openapi_dict
         self.image_name = image_name
         self.environment_vars = environment_vars
+        self.port = port
 
         self.openapi_spec = self._build_openapi_spec()
         self.client = httpx.AsyncClient()
@@ -41,4 +43,4 @@ class Service:
         if type(service_dict.get("openapi_spec", None)) is str:
             service_dict["openapi_spec"] = json.loads(service_dict["openapi_spec"])
         service_dict["openapi_dict"] = service_dict.pop("openapi_spec")
-        return cls(**service_dict)
+        return cls(**service_dict, port=service_dict["config"]["port"])
