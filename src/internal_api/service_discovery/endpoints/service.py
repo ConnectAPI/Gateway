@@ -39,7 +39,7 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     raise_if_service_name_if_forbidden(service.name)
     raise_if_service_name_exists(db, service.name)
 
-    service_url = f'http://{service.name}:{service.port}'
+    service_url = f'http://{service.name.replace(" ", "_")}:{service.port}'
     new_service = ServiceModel(url=service_url, **service.dict())
     service_dict = new_service.dict(escape=True)
     db.services.insert_one(service_dict)
