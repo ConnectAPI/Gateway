@@ -23,19 +23,20 @@ class JWTBearer(APIKeyHeader):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="token expired",
-                headers={"WWW-Authenticate": "Bearer"},
+                headers={"x-auth-exception": "Expired"},
             )
         except jwt.InvalidSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="invalid token",
-                headers={"WWW-Authenticate": "Bearer"},
+                headers={"x-auth-exception": "Invalid"}
             )
         for scope in required_scopes:
             if scope not in json_token["scopes"]:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail=f"Do not have permission for scope '{scope}'"
+                    detail=f"Do not have permission for scope '{scope}'",
+                    headers={"x-auth-exception": "Not Authorized", "x-required-scope": scope}
                 )
         return json_token
 
