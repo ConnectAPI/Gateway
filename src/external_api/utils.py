@@ -34,7 +34,7 @@ async def raise_on_invalid_request(service, p_request: ProxyRequest):
         validation_response = RequestValidator(service.openapi_spec).validate(p_request)
         if validation_response.errors:
             response_content = [str(error) for error in validation_response.errors]
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response_content)
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=response_content)
     return True
 
 
