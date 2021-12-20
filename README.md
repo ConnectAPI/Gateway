@@ -1,5 +1,5 @@
 # Gateway
-API gateway for the Box's system.
+API gateway for the ConnectAPI system.
 
 
 ### Full system overview
@@ -14,24 +14,21 @@ API gateway for the Box's system.
 Gateway responsible for:
 1. managing plugin services
 2. authentication
-3. validation (validating request against openapi spec)
+3. validation (validating request against OpenAPI spec)
 4. rate limit
 5. monitoring
 
 
 ### How it works?
-Every plugin service that added to the system must provide it's openapi spec,
-The spec can contain extra information like rate limit and required permission scope,
-With the openapi the service also contain link to a docker image.
-
-The gateway is running the docker image on a virtual network and used as a proxy to it.
+This service is used as a reversed proxy for the system, and provide the only entry point to the backend,
+every request is validated on the OpenAPI spec, and authorized before forwarded to the destination service.
 
 
 ### File structure
 ```
 ├───core
 │   └───models
-├───external_api // API the application suposed to access
+├───external_api // API for the client side (application / website / game)
 │   └───endpoints // routes
 ├───internal_api // API for the dashboard and server side
 │   ├───auth // authentication service, handling permission tokens
