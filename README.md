@@ -2,14 +2,6 @@
 API gateway for the ConnectAPI system.
 
 
-### Full system overview
-| Service      | Description | repo       |
-|--------------|:-------------|------------|
-| **Marketplace**  | Provide api and website to upload, download and search services. | https://github.com/ConnectAPI/MarketPlace  |
-| **Gateway**      | The only entry point to the system, responsible for auth, validation and rate limit's. | https://github.com/ConnectAPI/Gateway |
-| **Dashboard**    | Provide easy interface for managing and monitoring the system. | https://github.com/ConnectAPI/Dashboard |
-
-
 ### What it does?
 Gateway responsible for:
 1. managing plugin services
