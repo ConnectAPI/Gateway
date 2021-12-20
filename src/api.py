@@ -11,7 +11,7 @@ from internal_api.service_discovery.openapi import openapi_schema
 
 
 app = FastAPI(title="Gateway")
-app.add_middleware(PrometheusMiddleware)
+app.add_middleware(PrometheusMiddleware, group_paths=True)
 app.mount("/internal", internal_api)
 
 app.add_route("/metrics", handle_metrics)
