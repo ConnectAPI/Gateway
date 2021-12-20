@@ -41,7 +41,7 @@ class ProxyRequest(OpenAPIRequest):
 
     @classmethod
     async def from_fastapi_request(cls, r: FastAPIRequest):
-        request_path = r.path_params["p"]  # Example: "users/block/{userId}"
+        request_path = r.path_params["p"]                       # Example: "users/block/{userId}"
         service_path = request_path[request_path.find("/")+1:]  # Example: "block/{userId}"
         service_name = request_path.split("/")[0]
 
