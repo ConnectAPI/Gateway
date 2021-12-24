@@ -6,9 +6,6 @@ from pydantic import BaseSettings
 __all__ = ["get_settings"]
 
 
-SRC_PATH = path[2]
-
-
 class Settings(BaseSettings):
     secret_key: str
 
@@ -22,16 +19,6 @@ class Settings(BaseSettings):
 
     host: str = "0.0.0.0"
     port: int = 80
-
-    class Config:
-        env_file = f"{SRC_PATH}/.env"
-        fields = {
-            'secret_key': {'env': 'secret_key'},
-            'mongo_url': {'env': "mongo_url"},
-            'redis_port': {'env': "redis_port"},
-            'redis_host': {'env': "redis_host"},
-            'env': {"env": "env"},
-        }
 
 
 @lru_cache

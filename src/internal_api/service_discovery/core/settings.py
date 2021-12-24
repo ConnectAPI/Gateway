@@ -15,18 +15,7 @@ class Settings(BaseSettings):
 
     debug = True
 
-    docker_network_name: str = "connectapi_core"
-
-    class Config:
-        env_file: str = ENV_FILE_PATH
-        fields = {
-            'mongo_url': {
-                'env': 'mongo_url',
-            },
-            'secret_key': {
-                'env': 'secret_key',
-            },
-        }
+    docker_network_name: str
 
 
 @lru_cache

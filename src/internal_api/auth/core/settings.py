@@ -3,8 +3,6 @@ from functools import lru_cache
 
 from pydantic import BaseSettings
 
-ENV_FILE_PATH = str(Path(__file__).parent.parent / '.env')
-
 
 class Settings(BaseSettings):
     mongo_url: str
@@ -20,20 +18,6 @@ class Settings(BaseSettings):
         "token:create", "token:delete", "token:read",
         "service:create", "service:read", "service:delete", "service:write",
     ]
-
-    class Config:
-        env_file: str = ENV_FILE_PATH
-        fields = {
-            'mongo_url': {
-                'env': 'mongo_url',
-            },
-            'super_user_secret': {
-                'env': 'super_user_secret',
-            },
-            'secret_key': {
-                'env': 'secret_key',
-            }
-        }
 
 
 @lru_cache
