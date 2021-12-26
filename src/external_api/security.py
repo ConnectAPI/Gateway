@@ -40,4 +40,5 @@ class JWTBearer(APIKeyHeader):
                 )
         return json_token
 
+
 auth_flow = JWTBearer()
