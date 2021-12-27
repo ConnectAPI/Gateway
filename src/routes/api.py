@@ -9,5 +9,5 @@ proxy_router.include_router(proxy_endpoint)
 
 
 internal_app = FastAPI()
-internal_app.include_router(service_router)
-internal_app.include_router(auth_router)
+internal_app.include_router(service_router, prefix="/service_discovery")
+internal_app.include_router(auth_router, prefix="/auth")
