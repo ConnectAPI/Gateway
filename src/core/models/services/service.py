@@ -4,6 +4,9 @@ from openapi_core import create_spec
 import httpx
 
 
+__all__ = ["Service"]
+
+
 class Service:
     def __init__(
             self,
@@ -42,3 +45,4 @@ class Service:
             service_dict["openapi_spec"] = json.loads(service_dict["openapi_spec"])
         service_dict["openapi_dict"] = service_dict.pop("openapi_spec")
         return cls(**service_dict)
+

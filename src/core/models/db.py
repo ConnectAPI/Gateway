@@ -10,6 +10,7 @@ class MongoDB:
         self._client = MongoClient(get_settings().mongo_url)
         self.db = self._client.get_database("gateway")
         self.services = self.db.get_collection("services")
+        self.tokens = self.db.get_collection("tokens")
 
     def close(self):
         self._client.close()

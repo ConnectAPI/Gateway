@@ -3,16 +3,14 @@ from starlette_exporter import PrometheusMiddleware, handle_metrics
 
 from core.models.db import get_db
 from core.models.cache import get_cache
+from core.models.services import get_services, openapi_schema
 
-from external_api import proxy_router
-from internal_api import internal_api
-from internal_api.service_discovery import get_services
-from internal_api.service_discovery.openapi import openapi_schema
+from routes import proxy_router, internal_app
 
 
 app = FastAPI(title="Gateway")
+app.mount("/internal", internal_app)
 app.add_middleware(PrometheusMiddleware)
-app.mount("/internal", internal_api)
 
 app.add_route("/metrics", handle_metrics)
 app.include_router(proxy_router)

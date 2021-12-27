@@ -3,7 +3,7 @@ from functools import lru_cache
 import docker
 from docker.errors import DockerException
 
-from ..settings import get_settings
+from core.settings import get_settings
 
 __all__ = [
     'docker_client',

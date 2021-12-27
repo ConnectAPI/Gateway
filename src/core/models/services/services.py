@@ -1,10 +1,10 @@
 from typing import Dict, Optional
 from functools import lru_cache
 
-from .db import get_db
-from .docker import docker_client, DockerException
+from core.models.db import get_db
 from .service import Service
-from ..settings import get_settings
+from .docker import docker_client, DockerException
+from core.settings import get_settings
 
 __all__ = ["get_services", "Services"]
 
@@ -57,13 +57,10 @@ class Services:
             environment_vars: dict
     ):
         service = Service(id, name, url, openapi_dict, image_name, environment_vars)
-        try:
-            self._activate(service)
-        except DockerException as DE:
-            if not get_settings().debug:
-                raise
-            print("Warning: docker error", DE)
+        if get_settings().env == "dev":
+            print("Warning: not running services on dev environment")
             return
+        self._activate(service)
         self.__services[service.name.lower()] = service
         self.__services_by_id[service.id] = service
 

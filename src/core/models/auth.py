@@ -18,7 +18,7 @@ class JWTBearer(APIKeyHeader):
             required_scopes = []
         token = await super().__call__(request)
         try:
-            json_token = jwt.decode(token, self.secret, algorithms=get_settings().auth_jwt_algorithms)
+            json_token = jwt.decode(token, self.secret, algorithms=get_settings().jwt_algorithms)
         except jwt.ExpiredSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

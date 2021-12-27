@@ -1,25 +1,41 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Request
 
-from ..core.models.services import get_services
-from ..core.models.docker import (
+from core.models.services import get_services
+from core.models.services.docker import (
     NotAuthorizedContainer,
     ContainerNotFound,
     ContainerAllReadyRunning,
     ImageNotFound,
 )
 
-from ..core.models.db import get_db
-from ..core.schemas.service import NewService, ServiceModel
-from ..autherization import user_permissions, raise_not_authorized
-from .validations import raise_if_service_name_exists, raise_if_service_name_if_forbidden
+from core.models.db import get_db
+from core.schemas.service import NewService, ServiceModel
+from core.models.auth import auth_flow
 
-service_endpoint = APIRouter(prefix="/service", tags=["service"])
+service_router = APIRouter(prefix="/service", tags=["service"])
 
 
-@service_endpoint.delete("")
-def remove(service_id: str, user_scopes: list = Depends(user_permissions)):
-    raise_not_authorized(user_scopes, ["service:delete"])
+FORBIDDEN_SERVICE_NAMES = ['internal']
+
+
+def raise_if_service_name_exists(db, service_name):
+    if db.services.find_one({"name": service_name}, {"_id": 1}):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="name are all ready exist.")
+
+
+def raise_if_service_name_if_forbidden(service_name):
+    if service_name.lower() in FORBIDDEN_SERVICE_NAMES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="service name is forbidden."
+        )
+
+
+@service_router.delete("")
+async def remove(r: Request, service_id: str):
     db = get_db()
+    await auth_flow(r, required_scopes=["service:delete"])
+
     service = db.services.find_one_and_delete({"id": service_id})
     if service is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"service with id {service_id} not found")
@@ -30,10 +46,11 @@ def remove(service_id: str, user_scopes: list = Depends(user_permissions)):
     return {"removed": True}
 
 
-@service_endpoint.put("", status_code=201)
-def create(service: NewService, user_scopes: list = Depends(user_permissions)):
-    raise_not_authorized(user_scopes, ["service:write"])
+@service_router.put("", status_code=201)
+async def create(r: Request, service: NewService):
     db = get_db()
+    await auth_flow(r, required_scopes=["service:write"])
+
     raise_if_service_name_if_forbidden(service.name)
     raise_if_service_name_exists(db, service.name)
 
@@ -54,7 +71,7 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     except NotAuthorizedContainer:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Image name is not from boxs docker hub account."
+            detail="Image name is not from connectapisys docker hub account."
         )
     except ContainerAllReadyRunning:
         raise HTTPException(
@@ -69,33 +86,37 @@ def create(service: NewService, user_scopes: list = Depends(user_permissions)):
     return {"service_id": service.id}
 
 
-@service_endpoint.get("")
-def get(service_id: str, user_scopes: list = Depends(user_permissions)):
-    raise_not_authorized(user_scopes, ["service:read"])
+@service_router.get("")
+async def get(r: Request, service_id: str):
     db = get_db()
+    await auth_flow(r, required_scopes=["service:read"])
+
     service_dict = db.services.find_one({"id": service_id}, {"_id": 0})
     if service_dict is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"service with id '{service_id}' not found")
     return ServiceModel(**service_dict).dict()
 
 
-@service_endpoint.post("/pause")
-def pause(service_id: str, user_scopes: list = Depends(user_permissions)):
-    raise_not_authorized(user_scopes, ["service:delete"])
+@service_router.post("/pause")
+async def pause(r: Request, service_id: str):
+    await auth_flow(r, required_scopes=["service:delete"])
+
     get_services().pause(service_id)
     return {"pause": True}
 
 
-@service_endpoint.post("/unpause")
-def pause(service_id: str, user_scopes: list = Depends(user_permissions)):
-    raise_not_authorized(user_scopes, ["service:delete"])
+@service_router.post("/unpause")
+async def pause(r: Request, service_id: str):
+    await auth_flow(r, required_scopes=["service:delete"])
+
     get_services().pause(service_id)
     return {"unpause": True}
 
 
-@service_endpoint.get("/list")
-def service_list(user_scopes: list = Depends(user_permissions)):
-    raise_not_authorized(user_scopes, ["service:read"])
+@service_router.get("/list")
+async def service_list(r: Request):
     db = get_db()
+    await auth_flow(r, required_scopes=["service:delete"])
+
     services = list(db.services.find({}, {"_id": 0, "id": 1, "name": 1}))
     return services
