@@ -45,6 +45,7 @@ async def create_token(
     if "token:create" in new_key.scopes:
         endpoint_required_scopes.append(get_settings().super_user_scope)
 
+    print(super_user_secret)
     if super_user_secret != get_settings().super_user_secret:
         await auth_flow(r, required_scopes=endpoint_required_scopes)
 
