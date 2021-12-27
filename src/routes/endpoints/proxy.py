@@ -28,7 +28,7 @@ def raise_on_invalid_request(service, p_request: ProxyRequest):
 
 
 def get_service_endpoint_required_scopes(p_request: ProxyRequest, service) -> list:
-    required_scopes = service.required_scopes(p_request.service_path, p_request.method.lower())
+    required_scopes = service.required_scopes("/" + p_request.service_path, p_request.method.lower())
     return required_scopes
 
 
