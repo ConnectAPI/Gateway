@@ -35,6 +35,12 @@ async def create_token(
 ):
     """Create new token with permission scopes"""
     db = get_db()
+    if get_settings().super_user_scope in new_key.scopes:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Can't add superuser scope to token pass it as separate header"
+        )
+
     endpoint_required_scopes = ["token:create"]
     if "token:create" in new_key.scopes:
         endpoint_required_scopes.append(get_settings().super_user_scope)
