@@ -59,12 +59,8 @@ async def forward_request(p_request, service) -> Response:
 
 
 async def proxy_request(request: Request, bt: BackgroundTasks):
-    """
-    Every request that need to access one of the services is going through here
+    """ Every request that need to access one of the services is going through here
     this method is responsible for validation and checking the request permissions.
-    :param bt:
-    :param request:
-    :return: The response from the internal service
     """
     p_request = await ProxyRequest.from_fastapi_request(request)  # The ProxyRequest object have some useful methods
     service = get_service(p_request)  # Load service object from the service_discovery service
