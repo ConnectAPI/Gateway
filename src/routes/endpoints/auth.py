@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, HTTPException, status, Request
+from fastapi import APIRouter, HTTPException, status, Request, Header
 import jwt
 
 from core.schemas.token import NewTokenForm, Token
@@ -31,13 +31,16 @@ def create_jwt_token(scopes: list, tid: str):
 async def create_token(
         r: Request,
         new_key: NewTokenForm,
+        super_user_secret: str = Header(default=None)
 ):
     """Create new token with permission scopes"""
     db = get_db()
     endpoint_required_scopes = ["token:create"]
     if "token:create" in new_key.scopes:
         endpoint_required_scopes.append(get_settings().super_user_scope)
-    await auth_flow(r, required_scopes=endpoint_required_scopes)
+
+    if super_user_secret != get_settings().super_user_secret:
+        await auth_flow(r, required_scopes=endpoint_required_scopes)
 
     token = Token(scopes=new_key.scopes)
     encoded_token = create_jwt_token(token.scopes, token.tid)
