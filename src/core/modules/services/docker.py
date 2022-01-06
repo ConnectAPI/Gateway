@@ -36,23 +36,23 @@ class DockerServicesManager:
         self.docker_client = docker.from_env()
         self.containers = {}
 
-    def stop_container(self, service_name: str):
-        container = self.containers.pop(service_name, None)
+    def stop_container(self, short_id: str):
+        container = self.containers.pop(short_id, None)
         if container is None:
-            raise ContainerNotFound(f'container for service "{service_name}" not found.')
+            raise ContainerNotFound(f'container "{short_id}" not found.')
         container.stop()
         container.remove()
 
-    def pause(self, service_name: str):
-        container = self.containers.pop(service_name, None)
+    def pause(self, short_id: str):
+        container = self.containers.pop(short_id, None)
         if container is None:
-            raise ContainerNotFound(f'container for service "{service_name}" not found.')
+            raise ContainerNotFound(f'container "{short_id}" not found.')
         container.pause()
 
-    def unpause(self, service_name: str):
-        container = self.containers.pop(service_name, None)
+    def unpause(self, short_id: str):
+        container = self.containers.pop(short_id, None)
         if container is None:
-            raise ContainerNotFound(f'container for service "{service_name}" not found.')
+            raise ContainerNotFound(f'container "{short_id}" not found.')
         container.unpause()
 
     @staticmethod
@@ -62,12 +62,12 @@ class DockerServicesManager:
         :param image_name: the name of the image e.g "ConnectAPI/some_image_name"
         :return: bool
         """
+        # TODO: add in prod
+        # return image_name.startswith('connectapisys/')
         return True
-        # return image_name.startswith('boxs/')
 
     def pull_image(self, image_name: str):
-        """Pull the image from docker hub
-        """
+        """Pull the image from docker hub or just use the local image if exist"""
         image = self.docker_client.images.get(image_name)
         if image:
             return image
@@ -92,8 +92,8 @@ class DockerServicesManager:
             hostname=service_name,
             environment=environment,
         )
-        self.containers[service_name] = container
-        return container
+        self.containers[container.short_id] = container
+        return container.short_id
 
     def stop_all(self):
         for service_name, container in self.containers.items():

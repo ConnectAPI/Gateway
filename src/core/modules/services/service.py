@@ -3,6 +3,9 @@ import json
 from openapi_core import create_spec
 import httpx
 
+from .docker import docker_client
+from core.settings import get_settings
+
 
 __all__ = ["Service"]
 
@@ -20,13 +23,39 @@ class Service:
     ):
         self.id: str = id
         self.name = name
-        self.url = url
-        self.openapi_dict = openapi_dict
         self.image_name = image_name
         self.environment_vars = environment_vars
+        self.url = url
+        self.openapi_dict = openapi_dict
 
         self.openapi_spec = self._build_openapi_spec()
         self.client = httpx.AsyncClient()
+
+        self._container_id = None
+        self.paused = False
+        self.active = False
+
+    def activate(self):
+        if get_settings().env == "dev":
+            print("Warning: not running services on dev environment")
+            return
+        self._container_id = docker_client().run_container(
+            self.image_name,
+            self.environment_vars,
+            self.name,
+        )
+        self.active = True
+
+    def deactivate(self):
+        docker_client().stop_container(self._container_id)
+
+    def pause(self):
+        docker_client().pause(self._container_id)
+        self.paused = True
+
+    def unpause(self):
+        docker_client().unpause(self._container_id)
+        self.paused = False
 
     def required_scopes(self, path: str, operation: str) -> list:
         operation = self.openapi_dict["paths"][path][operation]
@@ -36,6 +65,7 @@ class Service:
 
     def _build_openapi_spec(self):
         self.openapi_dict["servers"] = [{"url": f"http://boxs.ml/{self.name.lower()}"}]
+        # TODO: remove in prod
         openapi_spec = create_spec(self.openapi_dict)
         return openapi_spec
 

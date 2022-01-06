@@ -1,16 +1,16 @@
 from fastapi import APIRouter, HTTPException, status, Request
 
-from core.models.services import get_services
-from core.models.services.docker import (
+from core.modules.services import get_services
+from core.modules.services.docker import (
     NotAuthorizedContainer,
     ContainerNotFound,
     ContainerAllReadyRunning,
     ImageNotFound,
 )
 
-from core.models.db import get_db
+from core.modules.db import get_db
 from core.schemas.service import NewService, ServiceModel
-from core.models.auth import auth_flow
+from core.modules.auth import auth_flow
 
 service_router = APIRouter(prefix="/service", tags=["service"])
 
@@ -106,10 +106,10 @@ async def pause(r: Request, service_id: str):
 
 
 @service_router.post("/unpause")
-async def pause(r: Request, service_id: str):
+async def unpause(r: Request, service_id: str):
     await auth_flow(r, required_scopes=["service:delete"])
 
-    get_services().pause(service_id)
+    get_services().unpause(service_id)
     return {"unpause": True}
 
 

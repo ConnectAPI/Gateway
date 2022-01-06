@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 
-from core.models.db import get_db
-from core.models.cache import get_cache
-from core.models.services import get_services, openapi_schema
+from core.modules.db import get_db
+from core.modules.cache import get_cache
+from core.modules.services import get_services, openapi_schema
 
 from routes import proxy_router, internal_app
 
