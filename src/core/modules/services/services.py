@@ -21,6 +21,8 @@ class Services:
         ]
         for service in services:
             service.activate()
+            self.__services[service.name.lower()] = service
+            self.__services_by_id[service.id] = service
 
     def add(
             self,
