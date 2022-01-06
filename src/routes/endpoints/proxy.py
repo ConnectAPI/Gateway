@@ -2,56 +2,72 @@ from urllib.parse import urljoin
 
 from fastapi import APIRouter, Request, BackgroundTasks, HTTPException, status, Response
 from openapi_core.validation.request.validators import RequestValidator
+from openapi_core.validation.request.datatypes import OpenAPIRequest, RequestParameters
 
-from core.models.services import get_services
-from core.models.auth import auth_flow
-
-from ..proxy_request import ProxyRequest
+from core.modules.services import get_services
+from core.modules.auth import auth_flow
+from core.settings import get_settings
 
 proxy_endpoint = APIRouter()
 
 
-def get_service(request: ProxyRequest):
-    service = get_services().get_by_name(request.service_name.lower())
+def get_service(service_name: str):
+    service = get_services().get_by_name(service_name)
     if service is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="service not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"service {service_name} not found")
     return service
 
 
-def raise_on_invalid_request(service, p_request: ProxyRequest):
+def raise_on_invalid_request(request: Request, service, body):
     if service.openapi_spec:
-        validation_response = RequestValidator(service.openapi_spec).validate(p_request)
+        # Create openapi request object
+        full_pattern = str(request.base_url) + str(request.path_params['q'])
+        full_content_type = request.headers.get("Content-Type")
+        query_params = {k: v for k, v in request.query_params.items()}
+        headers = {k: v for k, v in request.headers.items() if k != get_settings().auth_token_header}
+
+        openapi_request = OpenAPIRequest(
+            full_url_pattern=full_pattern,
+            method=request.method.lower(),
+            body=body,
+            mimetype=None if full_content_type is None else full_content_type.split(";")[0].lower(),
+            parameters=RequestParameters(query=query_params, header=headers, cookie=request.cookies, path={}),
+        )
+
+        # Validate the request against the openapi spec
+        validation_response = RequestValidator(service.openapi_spec).validate(openapi_request)
         if validation_response.errors:
             response_content = [str(error) for error in validation_response.errors]
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=response_content)
     return True
 
 
-def get_service_endpoint_required_scopes(p_request: ProxyRequest, service) -> list:
-    required_scopes = service.required_scopes("/" + p_request.service_path, p_request.method.lower())
+def get_service_endpoint_required_scopes(request: Request, service_path: str, service) -> list:
+    required_scopes = service.required_scopes("/" + service_path, request.method.lower())
     return required_scopes
 
 
-async def forward_request(p_request, service) -> Response:
+async def forward_request(request: Request, service_path: str, body, service) -> Response:
     """ Forward the request to the service and return the response
-    :param p_request: The request to forward
+    :param body:
+    :param service_path:
+    :param request: The request to forward
     :param service: the service to forward the request to (info of the service like url)
     :return: The service response
     """
-    url = urljoin(service.url, p_request.service_path)
+    url = urljoin(service.url, service_path)
     service.client.cookies.clear()  # Do not save state for security reasons
     service.client.headers.clear()
     service_response = await service.client.request(
-        p_request.method,
+        request.method,
         url=url,
-        data=p_request.body,
-        params=p_request.parameters.query,
-        cookies=p_request.cookies,
-        headers={k: v for k, v in p_request.headers.items()}
+        data=body,
+        params={k: v for k, v in request.query_params.items()},
+        cookies=request.cookies,
+        headers={k: v for k, v in request.headers.items()}
     )
-    response_content = service_response.content
     response = Response(
-        content=response_content,
+        content=service_response.content,
         status_code=service_response.status_code,
         headers={k: v for k, v in service_response.headers.items()},
     )
@@ -62,13 +78,17 @@ async def proxy_request(request: Request, bt: BackgroundTasks):
     """ Every request that need to access one of the services is going through here
     this method is responsible for validation and checking the request permissions.
     """
-    p_request = await ProxyRequest.from_fastapi_request(request)  # The ProxyRequest object have some useful methods
-    service = get_service(p_request)  # Load service object from the service_discovery service
-    raise_on_invalid_request(service, p_request)  # Validate the request against the service openapi spec
-    required_scopes = get_service_endpoint_required_scopes(p_request, service)
+    requested_path = request.path_params['q']  # Example: "users/block/{userId}"
+    service_path = requested_path[requested_path.find("/") + 1:]  # Example: "block/{userId}"
+    service_name = requested_path.split("/")[0]  # Example: "users"
+    body = (await request.body()).decode()
+
+    service = get_service(service_name)  # Load service object
+    raise_on_invalid_request(request, service, body)  # Validate the request against the service openapi spec
+    required_scopes = get_service_endpoint_required_scopes(request, service_path, service)
     await auth_flow(request, required_scopes=required_scopes)  # Raises on auth exception
 
-    response = await forward_request(p_request, service)
+    response = await forward_request(request, service_path, body, service)
     return response
 
 

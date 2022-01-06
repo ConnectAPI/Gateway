@@ -10,7 +10,12 @@ __all__ = ["JWTBearer", "auth_flow"]
 
 class JWTBearer(APIKeyHeader):
     def __init__(self, *args, **kwargs):
-        super().__init__(name="x-access-token", description="Authentication JWT key for services", *args, **kwargs)
+        super().__init__(
+            name=get_settings().auth_token_header,
+            description="Authentication JWT key for services",
+            *args,
+            **kwargs
+        )
         self.secret = get_settings().secret_key
 
     async def __call__(self, request: Request, required_scopes: list = None):

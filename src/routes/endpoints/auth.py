@@ -4,9 +4,9 @@ from fastapi import APIRouter, HTTPException, status, Request, Header
 import jwt
 
 from core.schemas.token import NewTokenForm, Token
-from core.models.db import get_db
 from core.settings import get_settings
-from core.models.auth import auth_flow
+from core.modules.db import get_db
+from core.modules.auth import auth_flow
 
 
 __all__ = ["auth_router"]

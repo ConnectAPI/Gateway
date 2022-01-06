@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     port: int = 80
 
     # auth
+    auth_token_header: str = "x-access-token"
     super_user_secret: str = "usyusyauall"
     jwt_algorithms = ["HS256"]
     jwt_lifetime = 1200  # 20 minuets
