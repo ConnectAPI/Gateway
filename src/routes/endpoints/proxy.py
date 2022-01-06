@@ -21,7 +21,7 @@ def get_service(service_name: str):
 def raise_on_invalid_request(request: Request, service, body):
     if service.openapi_spec:
         # Create openapi request object
-        full_pattern = str(request.base_url) + str(request.path_params['q'])
+        full_pattern = str(request.base_url) + str(request.path_params["p"])
         full_content_type = request.headers.get("Content-Type")
         query_params = {k: v for k, v in request.query_params.items()}
         headers = {k: v for k, v in request.headers.items() if k != get_settings().auth_token_header}
@@ -78,7 +78,7 @@ async def proxy_request(request: Request, bt: BackgroundTasks):
     """ Every request that need to access one of the services is going through here
     this method is responsible for validation and checking the request permissions.
     """
-    requested_path = request.path_params['q']  # Example: "users/block/{userId}"
+    requested_path = request.path_params['p']  # Example: "users/block/{userId}"
     service_path = requested_path[requested_path.find("/") + 1:]  # Example: "block/{userId}"
     service_name = requested_path.split("/")[0]  # Example: "users"
     body = (await request.body()).decode()
