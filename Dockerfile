@@ -8,6 +8,10 @@ COPY . .
 EXPOSE 80 1687
 
 ENV PYTHONPATH "${PYTHONPATH}:./src"
+ENV ENV "producation"
+ENV HOST "0.0.0.0"
+ENV PORT 80
+
 
 WORKDIR ./src
 
