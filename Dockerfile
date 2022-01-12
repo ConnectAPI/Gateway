@@ -3,7 +3,7 @@ FROM python:3.10-slim-buster
 COPY ./requirements.txt ./requirements.txt
 RUN pip install -r requirements.txt --no-cache-dir
 
-COPY . .
+COPY ./src .
 
 EXPOSE 80 1687
 

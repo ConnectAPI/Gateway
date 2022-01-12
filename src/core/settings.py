@@ -49,6 +49,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    res = Settings()
-    print(res.mongo_url, res.env)
-    return res
+    return Settings()
