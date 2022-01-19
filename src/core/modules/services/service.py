@@ -64,8 +64,6 @@ class Service:
         return list(operation["security"][0].values())
 
     def _build_openapi_spec(self):
-        self.openapi_dict["servers"] = [{"url": f"http://boxs.ml/{self.name.lower()}"}]
-        # TODO: remove in prod
         openapi_spec = create_spec(self.openapi_dict)
         return openapi_spec
 
