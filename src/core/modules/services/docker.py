@@ -1,7 +1,7 @@
 from functools import lru_cache
 
 import docker
-from docker.errors import DockerException
+from docker.errors import DockerException, APIError
 
 from core.settings import get_settings
 
@@ -13,6 +13,9 @@ __all__ = [
     'ImageNotFound',
     "DockerException"
 ]
+
+
+DOCKERHUB_ACCOUNT = "connectapihub"
 
 
 class NotAuthorizedContainer(Exception):
@@ -62,9 +65,7 @@ class DockerServicesManager:
         :param image_name: the name of the image e.g "ConnectAPI/some_image_name"
         :return: bool
         """
-        # TODO: add in prod
-        # return image_name.startswith('connectapisys/')
-        return True
+        return image_name.startswith(f'{DOCKERHUB_ACCOUNT}/')
 
     def pull_image(self, image_name: str):
         """Pull the image from docker hub or just use the local image if exist"""
@@ -73,7 +74,7 @@ class DockerServicesManager:
             return image
         try:
             return self.docker_client.images.pull(image_name, tag='latest')
-        except Exception:
+        except APIError:
             return None
 
     def run_container(self, image_name: str, environment: dict, service_name: str):
