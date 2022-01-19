@@ -2,5 +2,5 @@
 
 git pull
 
-docker build -t connectapi_gateway .
+docker build -t connectapihub/gateway .
 
