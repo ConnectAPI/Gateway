@@ -35,8 +35,8 @@ def raise_on_invalid_request(request: Request, service, body):
         )
 
         # Validate the request against the openapi spec
-        if not service.openapi_spec.get("servers", None):
-            service.openapi_spec["servers"] = [{"url": f"http://{request.base_url}/{service.name}"}]
+        # if not service.openapi_spec.get("servers", None):
+        #     service.openapi_spec["servers"] = [{"url": f"http://{request.base_url}/{service.name}"}]
         validation_response = RequestValidator(service.openapi_spec).validate(openapi_request)
         if validation_response.errors:
             response_content = [str(error) for error in validation_response.errors]
