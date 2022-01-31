@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-DOCKERHUB_ACCOUNT = "connectapihub"
+DOCKERHUB_ACCOUNT = "connectapihub"  # TODO: move to settings
 
 
 class NotAuthorizedContainer(Exception):
