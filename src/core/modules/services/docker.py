@@ -61,8 +61,8 @@ class DockerServicesManager:
     @staticmethod
     def allowed_docker_image(image_name: str):
         """
-        Check if the docker image is from box's github account
-        :param image_name: the name of the image e.g "ConnectAPI/some_image_name"
+        Check if the docker image is from connectapi dockerhub account
+        :param image_name: the name of the image e.g "<connectapi dockerhub account>/some_image_name"
         :return: bool
         """
         return image_name.startswith(f'{DOCKERHUB_ACCOUNT}/')
