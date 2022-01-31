@@ -102,4 +102,4 @@ async def deactivate(r: Request, token_id: str):
     await auth_flow(r, required_scopes=["token:delete"])
 
     result = db.tokens.update_one({"tid": token_id}, {"active": False})
-    return {"deactivate": result.deleted_count > 0}
+    return {"deactivated": result.updated_count > 0}
